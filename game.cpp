@@ -1,8 +1,13 @@
 #include <iostream>
 #include <SDL2/SDL.h>
 #include <SDL2/SDl_image.h>
+#include <string>
+#include <vector>
+#include <cstdlib>
+#include <ctime>
 
 #include "SDL_Utils.h"
+#include "images.h"
 
 using namespace std;
 
@@ -11,131 +16,133 @@ const int SCREEN_HEIGHT = 717;
 const string WINDOW_TITLE = "An Implementation of Code.org Painter";
 int step_delay=1000;
 int stepX=0, stepY=0;
-SDL_Renderer* renderer;
 
-class LTexture
-{
-    public:
-        LTexture();
-        ~LTexture();
-        bool loadFromFile( std::string path);
-        void free();
-        void render( int x, int y);
-        int getWidth();
-        int getHeight();
+Texture ourPlane(SCREEN_WIDTH/2, SCREEN_HEIGHT-ourPlane.getHeight()-100);
+Texture backgroundGame;
+Texture bullet(-100, 200);
+Texture enermy1(-100, 0);
 
-    private:
-        SDL_Texture* mTexture;
-        int mWidth;
-        int mHeight;
-};
+bool loadMedia(SDL_Renderer* renderer);
 
-LTexture gFooTexture;
-LTexture gBackgroundTexture;
-LTexture bullet1;
-LTexture bullet2;
-LTexture bullet3;
+void movePlane();
 
-LTexture :: LTexture(){
-    mTexture=NULL;
-    mWidth=0;
-    mHeight=0;
-}
+void turnLeft();
 
-LTexture ::~ LTexture(){
-    free();
-}
+void turnRight();
 
-bool LTexture :: loadFromFile(string path){
-    free();
-    SDL_Texture* newTexture=NULL;
-    SDL_Surface* loadedSurface = IMG_Load(path.c_str());
-    if( loadedSurface == NULL )
-    {
-        printf( "Unable to load image %s! SDL_image Error: %s\n", path.c_str(), IMG_GetError() );
+void moveBullet();
+
+void moveEnermy(Texture s[]);
+
+void handlePlane(SDL_Event& e);
+
+bool gameOver(Texture s[]) {
+    for(int i=0;i<5;i++) {
+        int enermyTop = s[i].y + ourPlane.getHeight() - 50;
+        int enermyLeft = s[i].x+s[i].getWidth();
+        int enermyRight = s[i].x-s[i].getWidth();
+        if(ourPlane.y <= enermyTop && enermyLeft > ourPlane.x && enermyRight < ourPlane.x) return true;
     }
-    else
-    {
-        SDL_SetColorKey( loadedSurface, SDL_TRUE, SDL_MapRGB( loadedSurface->format, 0, 0xFF, 0xFF ) );
-        newTexture = SDL_CreateTextureFromSurface(renderer, loadedSurface );
-        if( newTexture == NULL )
+    return false;
+}
+
+bool banTrung(Texture s[], int & check) {
+    for(int i=0;i<5;i++) {
+        int enermyTop = s[i].y + s[i].getHeight();
+        int enermyLeft = s[i].x - bullet.getWidth();
+        int enermyRight = s[i].x+s[i].getWidth();
+        if(bullet.y <= enermyTop && enermyLeft <= bullet.x && enermyRight >= bullet.x)
         {
-            printf( "Unable to create texture from %s! SDL Error: %s\n", path.c_str(), SDL_GetError() );
+            check = i;
+            return true;
         }
-        else
-        {
-            //Get image dimensions
-            mWidth = loadedSurface->w;
-            mHeight = loadedSurface->h;
-        }
-
-        //Get rid of old loaded surface
-        SDL_FreeSurface( loadedSurface );
     }
-
-    //Return success
-    mTexture = newTexture;
-    return mTexture != NULL;
+    return false;
 }
 
-void LTexture::free()
+int main(int argc, char* argv[])
 {
-    //Free texture if it exists
-    if( mTexture != NULL )
+    srand(time(0));
+    SDL_Window* window=NULL;
+    SDL_Renderer* renderer;
+    initSDL(window, renderer, SCREEN_WIDTH, SCREEN_HEIGHT, WINDOW_TITLE);
+
+    loadMedia(renderer);
+    Texture s[5];
+    int check;
+    for (int i=0; i<5; i++) {
+        s[i]=enermy1;
+    }
+    int scrollingOffset = 0;
+    SDL_Event e;
+
+    while(!gameOver(s))
     {
-        SDL_DestroyTexture( mTexture );
-        mTexture = NULL;
-        mWidth = 0;
-        mHeight = 0;
+        moveBullet();
+        movePlane();
+        moveEnermy(s);
+
+        if(banTrung(s, check)) {
+            bullet.x=-100;
+            s[check].x=10000;
+        }
+
+        SDL_SetRenderDrawColor( renderer, 0xFF, 0xFF, 0xFF, 0xFF );
+        SDL_RenderClear( renderer );
+
+        scrollingOffset+=2;
+        if( scrollingOffset > backgroundGame.getHeight() )
+        {
+            scrollingOffset = 0;
+        }
+        backgroundGame.renderBackground( 0, scrollingOffset, renderer);
+        backgroundGame.renderBackground( 0, scrollingOffset - backgroundGame.getHeight(), renderer);
+        for(int i=0; i<5; i++)
+        {
+            s[i].render(renderer);
+        }
+        bullet.render(renderer);
+        ourPlane.render(renderer);
+        SDL_Delay(5);
+
+        SDL_RenderPresent(renderer);
+
+        if(SDL_PollEvent( &e ) == 0) continue;
+        if( e.type == SDL_QUIT ) break;
+        handlePlane(e);
     }
+
+    bullet.free();
+    ourPlane.free();
+    enermy1.free();
+    backgroundGame.free();
+    quitSDL(window, renderer);
+    return 0;
 }
 
-void LTexture::render( int x, int y)
-{
-    SDL_Rect renderQuad = { x, y, mWidth, mHeight };
-    SDL_RenderCopy( renderer, mTexture, NULL, &renderQuad );
-}
-
-int LTexture::getWidth()
-{
-    return mWidth;
-}
-
-int LTexture::getHeight()
-{
-    return mHeight;
-}
-
-bool loadMedia()
+bool loadMedia(SDL_Renderer* renderer)
 {
     bool success = true;
 
-    if( !gFooTexture.loadFromFile( "plane.png") )
+    if( !ourPlane.loadFromFile( "plane.png", renderer) )
     {
         printf( "Failed to load Foo' texture image!\n" );
         success = false;
     }
 
-    if( !bullet1.loadFromFile( "foo.png") )
+    if( !enermy1.loadFromFile( "enermy.png", renderer) )
     {
         printf( "Failed to load Foo' texture image!\n" );
         success = false;
     }
 
-    if( !bullet2.loadFromFile( "foo.png") )
+    if( !bullet.loadFromFile( "bullet.png", renderer) )
     {
         printf( "Failed to load Foo' texture image!\n" );
         success = false;
     }
 
-
-    if( !bullet3.loadFromFile( "foo.png") )
-    {
-        printf( "Failed to load Foo' texture image!\n" );
-        success = false;
-    }
-    //Load background texture
-    if( !gBackgroundTexture.loadFromFile( "planet.png") )
+    if( !backgroundGame.loadFromFile( "backGround.png", renderer) )
     {
         printf( "Failed to load background texture image!\n" );
         success = false;
@@ -144,101 +151,75 @@ bool loadMedia()
     return success;
 }
 
-void move(int &x, int &y){
-    if(x<=0 && stepX==-15)
-        x+=0;
-    else if(x>=SCREEN_WIDTH-gFooTexture.getWidth() && stepX==15)
-        x+=0;
-     else
-        x+=stepX;
-    y+=stepY;
-    }
-
-void turnLeft(){
-    stepX = -15;
-    stepY = 0;
-}
-
-void turnRight(){
-    stepX = 15;
-    stepY = 0;
-}
-
-void turnUp(){
-    stepX = 0;
-    stepY = -5;
-}
-
-void turnDown(){
-    stepX = 0;
-    stepY = 5;
-    }
-
-void moveBullet(int &bulletX, int& bulletY, int const& x, int const &y){
-    if(bulletY<=0) { bulletX = x + 50; bulletY=y;}
-    else bulletY-=20;
-}
-
-int main(int argc, char* argv[])
+void movePlane()
 {
-    SDL_Window* window=NULL;
+    if(ourPlane.x<=0 && stepX==-15)
+        ourPlane.x+=0;
+    else if(ourPlane.x>=SCREEN_WIDTH-ourPlane.getWidth() && stepX==15)
+        ourPlane.x+=0;
+    else
+        ourPlane.x+=stepX;
+}
 
-    initSDL(window, renderer, SCREEN_WIDTH, SCREEN_HEIGHT, WINDOW_TITLE);
+void turnLeft()
+{
+    stepX -= 15;
+    stepY = 0;
+}
 
-    SDL_Event e;
-        if( !loadMedia() )
-		{
-			printf( "Failed to load media!\n" );
-		}
-		else
-		{
-			SDL_Event e;
-            int x=SCREEN_WIDTH/2, y=SCREEN_HEIGHT-1-gFooTexture.getHeight(), bulletX=-100, bulletY=200, bullet2X=15, bullet2Y=0, bullet3X=-100, bullet3Y=400;
-			while(0 <= y && SCREEN_HEIGHT >= y+gFooTexture.getHeight())
-			{
-                moveBullet(bulletX, bulletY, x, y);
-                moveBullet(bullet2X, bullet2Y, x, y);
-                moveBullet(bullet3X, bullet3Y, x, y);
+void turnRight()
+{
+    stepX += 15;
+    stepY = 0;
+}
 
-				move(x, y);
-                cout << x << y << bullet2X << bullet2Y << bulletY << endl;
-                SDL_SetRenderDrawColor( renderer, 0xFF, 0xFF, 0xFF, 0xFF );
-				SDL_RenderClear( renderer );
-				gBackgroundTexture.render( 0, 0);
+void handlePlane(SDL_Event& e) {
+        if( e.type == SDL_KEYDOWN && e.key.repeat == 0 )
+        {
+            switch( e.key.keysym.sym )
+            {
+            case SDLK_LEFT:
+                turnLeft();
+                break;
+            case SDLK_RIGHT:
+                turnRight();
+                break;
+            }
+        }
+        else if( e.type == SDL_KEYUP && e.key.repeat == 0 )
+        {
+            switch( e.key.keysym.sym )
+            {
+            case SDLK_LEFT:
+                turnRight();
+                break;
+            case SDLK_RIGHT:
+                turnLeft();
+                break;
+            }
+        }
+}
 
-				gFooTexture.render( x, y);
+void moveBullet()
+{
+    if(bullet.y<=0)
+    {
+        bullet.x = ourPlane.x + 50;
+        bullet.y=ourPlane.y+50;
+    }
+    else
+        bullet.y-=20;
+}
 
-				bullet1.render(bulletX, bulletY);
-
-                bullet2.render(bullet2X, bullet2Y);
-
-                bullet3.render(bullet3X, bullet3Y);
-
-				SDL_RenderPresent( renderer );
-				if(SDL_PollEvent( &e ) == 0) continue;
-                if( e.type == SDL_QUIT ) break;
-                if (e.type == SDL_KEYDOWN) {
-                    switch (e.key.keysym.sym) {
-                        case SDLK_ESCAPE: break;
-                        case SDLK_LEFT: turnLeft();
-                            break;
-                        case SDLK_RIGHT: turnRight();
-                            break;
-                        case SDLK_DOWN: turnDown();
-                            break;
-                        case SDLK_UP: turnUp();
-                            break;
-                    default: break;
-                    }
-				 }
-
-			}
-		}
-    bullet1.free();
-    bullet2.free();
-    bullet3.free();
-    gFooTexture.free();
-    gBackgroundTexture.free();
-    quitSDL(window, renderer);
-    return 0;
+void moveEnermy(Texture s[])
+{
+    for(int i=0; i<5; i++)
+    {
+        if(s[i].y>SCREEN_HEIGHT)
+        {
+            s[i].x=rand()%(SCREEN_WIDTH-s[i].getWidth());
+            s[i].y=-100*i;
+        }
+        s[i].y +=7;
+    }
 }

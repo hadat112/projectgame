@@ -54,3 +54,36 @@
 	<iostream>
 	<SDL2/SDL.h>
 
+1587052613 source:d:\project\game\sdl_utils.cpp
+	<iostream>
+	<SDL2/SDL.h>
+	<SDL2/SDl_image.h>
+
+1588383340 source:d:\project\game\game.cpp
+	<iostream>
+	<SDL2/SDL.h>
+	<SDL2/SDl_image.h>
+	<string>
+	<vector>
+	<cstdlib>
+	<ctime>
+	"SDL_Utils.h"
+	"images.h"
+
+1586318013 d:\project\game\sdl_utils.h
+	<iostream>
+	<SDL2/SDL.h>
+
+1587779303 source:d:\project\game\images.cpp
+	<iostream>
+	<SDL2/SDL.h>
+	<SDL2/SDl_image.h>
+	"SDL_Utils.h"
+	"images.h"
+
+1587779157 d:\project\game\images.h
+	<iostream>
+	<SDL2/SDL.h>
+	<SDL2/SDl_image.h>
+	"SDL_Utils.h"
+

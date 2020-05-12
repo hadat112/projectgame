@@ -1,68 +1,9 @@
 # depslib dependency file v1.0
-1585926930 source:d:\c\new folder\sdl\sdl2-2.0.5\i686-w64-mingw32\bin\untitled2.cpp
-	<iostream>
-	<SDL2/SDL.h>
-
-1586541065 source:d:\c\baitap\game\untitled2.cpp
+1589168355 source:d:\project\game\game.cpp
 	<iostream>
 	<SDL2/SDL.h>
 	<SDL2/SDl_image.h>
-	"SDL_Utils.h"
-
-1586318013 d:\c\baitap\game\sdl_utils.h
-	<iostream>
-	<SDL2/SDL.h>
-
-1586352869 source:d:\c\baitap\game\sdl_utils.cpp
-	<iostream>
-	<SDL2/SDL.h>
-	<SDL2/SDl_image.h>
-
-1488053698 source:d:\pdffile\advprogram-bf6e82b1c9465dc78b3c2a9bdcdf2d79b83a584c\lec10-sdl\main.cpp
-	<iostream>
-	<cstdlib>
-	<ctime>
-	<cmath>
-	<SDL2/SDL.h>
-	"painter.h"
-
-1488053698 d:\pdffile\advprogram-bf6e82b1c9465dc78b3c2a9bdcdf2d79b83a584c\lec10-sdl\painter.h
-	<string>
-	<SDL2/SDL.h>
-
-1586355342 source:d:\c\baitap\game\image.cpp
-	<iostream>
-	<SDL2/SDL.h>
-	<SDL2/SDl_image.h>
-
-1586355342 d:\c\baitap\game\image.h
-	<iostream>
-	<SDL2/SDL.h>
-
-1586352869 source:d:\c\baitap\game\bin\debug\sdl_utils.cpp
-	<iostream>
-	<SDL2/SDL.h>
-	<SDL2/SDl_image.h>
-
-1586406400 source:d:\c\baitap\game\bin\debug\untitled2.cpp
-	<iostream>
-	<SDL2/SDL.h>
-	<SDL2/SDl_image.h>
-	"SDL_Utils.h"
-
-1586318013 d:\c\baitap\game\bin\debug\sdl_utils.h
-	<iostream>
-	<SDL2/SDL.h>
-
-1587052613 source:d:\project\game\sdl_utils.cpp
-	<iostream>
-	<SDL2/SDL.h>
-	<SDL2/SDl_image.h>
-
-1588383340 source:d:\project\game\game.cpp
-	<iostream>
-	<SDL2/SDL.h>
-	<SDL2/SDl_image.h>
+	<SDL2/SDL_ttf.h>
 	<string>
 	<vector>
 	<cstdlib>
@@ -70,20 +11,29 @@
 	"SDL_Utils.h"
 	"images.h"
 
-1586318013 d:\project\game\sdl_utils.h
+1588991726 d:\project\game\sdl_utils.h
 	<iostream>
 	<SDL2/SDL.h>
+	<SDL2/SDL_ttf.h>
 
-1587779303 source:d:\project\game\images.cpp
+1588990931 d:\project\game\images.h
 	<iostream>
 	<SDL2/SDL.h>
 	<SDL2/SDl_image.h>
+	<SDL2/SDL_ttf.h>
+	"SDL_Utils.h"
+
+1589087693 source:d:\project\game\sdl_utils.cpp
+	<iostream>
+	<SDL2/SDL.h>
+	<SDL2/SDl_image.h>
+	<SDL2/SDL_ttf.h>
+
+1588991128 source:d:\project\game\images.cpp
+	<iostream>
+	<SDL2/SDL.h>
+	<SDL2/SDl_image.h>
+	<SDL2/SDL_ttf.h>
 	"SDL_Utils.h"
 	"images.h"
-
-1587779157 d:\project\game\images.h
-	<iostream>
-	<SDL2/SDL.h>
-	<SDL2/SDl_image.h>
-	"SDL_Utils.h"
 

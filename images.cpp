@@ -1,9 +1,12 @@
 #include <iostream>
 #include <SDL2/SDL.h>
 #include <SDL2/SDl_image.h>
+#include <SDL2/SDL_ttf.h>
 
 #include "SDL_Utils.h"
 #include "images.h"
+
+TTF_Font *gFont = NULL;
 
 using namespace std;
 Texture :: Texture(int _x, int _y){
@@ -47,6 +50,35 @@ bool Texture :: loadFromFile(string path, SDL_Renderer* renderer){
         SDL_FreeSurface( loadedSurface );
     }
     newTexture = texture;
+    return newTexture != NULL;
+}
+
+bool Texture::loadFromRenderedText( std::string textureText, SDL_Color textColor, SDL_Renderer* renderer )
+{
+    free();
+    gFont = TTF_OpenFont( "lazy.ttf", 28 );
+    if(gFont== NULL) cout << "cant load font";
+
+    SDL_Surface* textSurface = TTF_RenderText_Solid( gFont, textureText.c_str(), textColor );
+    if( textSurface == NULL )
+    {
+        printf( "Unable to render text surface! SDL_ttf Error: %s\n", TTF_GetError() );
+    }
+    else
+    {
+        newTexture = SDL_CreateTextureFromSurface( renderer, textSurface );
+        if( newTexture  == NULL )
+        {
+            printf( "Unable to create texture from rendered text! SDL Error: %s\n", SDL_GetError() );
+        }
+        else
+        {
+            width = textSurface->w;
+            height = textSurface->h;
+        }
+        SDL_FreeSurface( textSurface );
+    }
+
     return newTexture != NULL;
 }
 

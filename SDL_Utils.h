@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_ttf.h>
 
 using namespace std;
 
@@ -12,6 +13,6 @@ void initSDL(SDL_Window* &window, SDL_Renderer* &renderer, int SCREEN_WIDTH, int
 
 void quitSDL(SDL_Window* window, SDL_Renderer* renderer);
 
-void waitUntilKeyPressed();
+bool waitUntilKeyPressed();
 
 #endif

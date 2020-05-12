@@ -1,6 +1,7 @@
 #include <iostream>
 #include <SDL2/SDL.h>
 #include <SDL2/SDl_image.h>
+#include <SDL2/SDL_ttf.h>
 
 using namespace std;
 
@@ -29,6 +30,7 @@ void initSDL(SDL_Window* &window, SDL_Renderer* &renderer, int SCREEN_WIDTH, int
     //SDL_Renderer *renderer = SDL_CreateSoftwareRenderer(SDL_GetWindowSurface(window));
     //if (renderer == nullptr)
     //  logSDLError(std::cout, "CreateRenderer", true);
+
     SDL_SetRenderDrawColor( renderer, 0xFF, 0xFF, 0xFF, 0xFF );
     int imgFlags = IMG_INIT_PNG;
     if( !( IMG_Init( imgFlags ) & imgFlags ) )
@@ -37,24 +39,35 @@ void initSDL(SDL_Window* &window, SDL_Renderer* &renderer, int SCREEN_WIDTH, int
     }
     SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
     //SDL_RenderSetLogicalSize(renderer, SCREEN_WIDTH, SCREEN_HEIGHT);
+
+    if( TTF_Init() == -1 )
+    {
+        printf( "SDL_ttf could not initialize! SDL_ttf Error: %s\n", TTF_GetError() );
+    }
+
+    if (SDL_Init( SDL_INIT_VIDEO | SDL_INIT_TIMER ) < 0 )
+    {
+        printf( "SDL could not initialize! SDL Error: %s\n", SDL_GetError() );
+    }
 }
 
 void quitSDL(SDL_Window* window, SDL_Renderer* renderer)
 {
+    TTF_Quit();
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
     IMG_Quit();
 }
 
-void waitUntilKeyPressed()
+bool waitUntilKeyPressed()
 {
     SDL_Event e;
     while (true)
     {
         if ( SDL_WaitEvent(&e) != 0 &&
                 (e.type == SDL_KEYDOWN || e.type == SDL_QUIT) )
-            return;
+            return true;
         SDL_Delay(100);
     }
 }

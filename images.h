@@ -1,6 +1,10 @@
+#ifndef SDL_IMAGES__H
+#define SDL_IMAGES__H
+
 #include <iostream>
 #include <SDL2/SDL.h>
 #include <SDL2/SDl_image.h>
+#include <SDL2/SDL_ttf.h>
 
 #include "SDL_Utils.h"
 
@@ -13,6 +17,7 @@ public:
     Texture();
     ~Texture();
     bool loadFromFile( std::string path, SDL_Renderer* renderer);
+    bool loadFromRenderedText( std::string textureText, SDL_Color textColor, SDL_Renderer* renderer );
     void free();
     void render(SDL_Renderer* renderer);
     void renderBackground(int a, int b, SDL_Renderer* renderer);
@@ -27,3 +32,4 @@ private:
     int height;
 
 };
+#endif

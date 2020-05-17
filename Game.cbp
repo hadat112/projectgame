@@ -39,9 +39,13 @@
 		</Linker>
 		<Unit filename="SDL_Utils.cpp" />
 		<Unit filename="SDL_Utils.h" />
+		<Unit filename="enermy.cpp" />
+		<Unit filename="enermy.h" />
 		<Unit filename="game.cpp" />
 		<Unit filename="images.cpp" />
 		<Unit filename="images.h" />
+		<Unit filename="plane.cpp" />
+		<Unit filename="plane.h" />
 		<Extensions>
 			<code_completion />
 			<envvars />

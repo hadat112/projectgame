@@ -1,44 +1,45 @@
 #include <iostream>
 #include <SDL2/SDL.h>
 #include <SDL2/SDl_image.h>
+#include <SDL2/SDL_mixer.h>
 #include <SDL2/SDL_ttf.h>
 #include <string>
 #include <vector>
 #include <cstdlib>
 #include <ctime>
+#include <cmath>
 
 #include "SDL_Utils.h"
 #include "images.h"
+#include "plane.h"
+#include "enermy.h"
 
 using namespace std;
 
 const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 717;
-const string WINDOW_TITLE = "An Implementation of Code.org Painter";
-int stepX=0, stepY=0;
-int ENERMY_SPEED=7;
+const string WINDOW_TITLE = "FIGHTER AIRCRAFT";
 int scrollingOffset = 0;
 
-Texture ourPlane(SCREEN_WIDTH/2-50, SCREEN_HEIGHT-ourPlane.getHeight()-100);
 Texture backgroundGame;
 Texture enermy1(-1000, 0);
-Texture test( ( SCREEN_WIDTH - test.getWidth() ) / 2 - 148, ( SCREEN_HEIGHT - test.getHeight() ) / 2 + 150 );
+Texture test( ( SCREEN_WIDTH - test.getWidth() ) / 2 - 140, ( SCREEN_HEIGHT - test.getHeight() ) / 2 + 150 );
 Texture score(50, 50);
-Texture gameOver((SCREEN_WIDTH)/2 - 130, SCREEN_HEIGHT/2-100);
+Texture gameOver((SCREEN_WIDTH)/2 - 110, SCREEN_HEIGHT/2-100);
+Texture huongDan(0, SCREEN_HEIGHT-300);
+Texture title(-5, 100);
 
-void loadMedia(SDL_Renderer* renderer);
-void movePlane();
-void turnLeft();
-void turnRight();
-void moveEnermy(Texture s[], const int & diem);
-void handlePlane(SDL_Event& e, vector<Texture*>& amo, SDL_Renderer* renderer);
-bool isGameOver(Texture s[]);
-bool banTrung(Texture s[], vector<Texture*> amo, int & checkEnermy, int & checkBullet);
-void resetPos(Texture s[]);
-void moveAmo(Texture* p);
-void drawBackground(SDL_Renderer* renderer);
-void drawMenu(SDL_Renderer* renderer,const int& lanchoi, bool& startGame, SDL_Event& e, Texture s[]);
-void drawGamePlay(SDL_Renderer* renderer, Texture s[], vector<Texture*> & amo, const int& diem);
+void loadMedia(SDL_Renderer* renderer, Texture* ourPlane);
+
+void resetPos(Texture enermy[], Texture enermyBullet[]);
+bool isGameOver(Texture enermy[], Texture enermyBullet[], Texture* ourPlane);
+bool banTrung(Texture enermy[], vector<Texture*> bullet, int & checkEnermy, int & checkBullet);
+
+void drawBackground(SDL_Renderer* renderer, Texture* ourPlane);
+void drawMenu(SDL_Renderer* renderer,const int& lanchoi, bool& startGame, SDL_Event& e, Texture enermy[], Texture enermyBullet[]);
+void drawGamePlay(SDL_Renderer* renderer, Texture enermy[], vector<Texture*> & bullet, const int& diem, Texture enermyBullet[]);
+
+void close( Texture enermy[], Texture enermyBullet[], Texture* ourPlane);
 
 int main(int argc, char* argv[])
 {
@@ -47,41 +48,57 @@ int main(int argc, char* argv[])
     SDL_Window* window=NULL;
     SDL_Renderer* renderer;
     initSDL(window, renderer, SCREEN_WIDTH, SCREEN_HEIGHT, WINDOW_TITLE);
-    loadMedia(renderer);
 
-    bool startGame = true;
+    bool startGame = false;
     int checkBullet, checkEnermy, diem=0, lanchoi=1;
-    Texture s[5];
-    vector<Texture *> amo;
-    for (int i=0; i<4; i++)
-        s[i]=enermy1;
+
+
+    vector<Texture *> bullet;
+
+    Texture* ourPlane=new Texture;
+    ourPlane->x = SCREEN_WIDTH/2-50;
+    ourPlane->y = SCREEN_HEIGHT-ourPlane->getHeight()-100;
     SDL_Event e;
 
+    loadMedia(renderer, ourPlane);
+    Texture enermy[5];
+    for (int i=0; i<4; i++)
+        enermy[i]=enermy1;
+    Texture enermyBullet[5];
+    for(int i=0;i<4;i++){
+        enermyBullet[i].loadFromFile("enermyBullet.png", renderer);
+        enermyBullet[i].x = enermy[i].x+20;
+        enermyBullet[i].y = enermy[i].y;
+    }
     while(true)
     {
         SDL_SetRenderDrawColor( renderer, 0xFF, 0xFF, 0xFF, 0xFF );
         SDL_RenderClear( renderer );
-
-        drawBackground(renderer);
-        if(startGame==true)
+        drawBackground(renderer, ourPlane);
+        if(startGame==false)
         {
-            drawMenu(renderer, lanchoi, startGame, e, s);
+            drawMenu(renderer, lanchoi, startGame, e, enermy, enermyBullet);
         }
         else
         {
-            drawGamePlay(renderer, s, amo, diem);
+            drawGamePlay(renderer, enermy, bullet, diem, enermyBullet);
 
-            movePlane();
-            moveEnermy(s, diem);
-            if(banTrung(s, amo, checkEnermy, checkBullet))
+            movePlane(ourPlane, SCREEN_WIDTH);
+            moveEnermy(enermy, diem, SCREEN_WIDTH, SCREEN_HEIGHT);
+
+            if(diem>100)
+                moveEnermyBullet(enermy, enermyBullet, diem, SCREEN_WIDTH, SCREEN_HEIGHT);
+
+            if(banTrung(enermy, bullet, checkEnermy, checkBullet))
             {
-                amo[checkBullet]->x=-100;
-                s[checkEnermy].x=10000;
+                bullet[checkBullet]->x=-100;
+                enermy[checkEnermy].x=10000;
                 diem+=10;
             }
-            if(isGameOver(s))
+            if(isGameOver(enermy, enermyBullet, ourPlane))
             {
-                startGame = true;
+                ourPlane->x=SCREEN_WIDTH/2-20;
+                startGame = false;
                 diem=0;
                 lanchoi++;
             }
@@ -91,24 +108,26 @@ int main(int argc, char* argv[])
             continue;
         if( e.type == SDL_QUIT )
             break;
-        handlePlane(e, amo, renderer);
+        handlePlane(e, bullet, renderer, ourPlane);
         SDL_Delay(10);
     }
-
-    test.free();
-    score.free();
-    ourPlane.free();
-    enermy1.free();
-    backgroundGame.free();
+    cout << "end";
+    close(enermy, enermyBullet, ourPlane);
     quitSDL(window, renderer);
     return 0;
 }
 
-void loadMedia(SDL_Renderer* renderer)
+void loadMedia(SDL_Renderer* renderer, Texture* ourPlane)
 {
-    if( !ourPlane.loadFromFile( "plane.png", renderer) )
+    if( !huongDan.loadFromFile( "huongdan.png", renderer) )
         cout << "Failed to load plane texture image!" << endl;
 
+    if( !title.loadFromFile( "title.png", renderer) )
+        cout << "Failed to load plane texture image!" << endl;
+
+    if( !ourPlane->loadFromFile( "plane.png", renderer) )
+        cout << "Failed to load plane texture image!" << endl;
+    cout << "run";
     if( !enermy1.loadFromFile( "enermy.png", renderer) )
         cout <<  "Failed to load enermy texture image!" << endl;
 
@@ -124,107 +143,39 @@ void loadMedia(SDL_Renderer* renderer)
         cout << "Failed to render text texture!" << endl;
 }
 
-void movePlane()
-{
-    if(ourPlane.x<=0 && stepX==-10)
-        ourPlane.x+=0;
-    else if(ourPlane.x>=SCREEN_WIDTH-ourPlane.getWidth() && stepX==10)
-        ourPlane.x+=0;
-    else
-        ourPlane.x+=stepX;
-}
-
-void turnLeft()
-{
-    stepX -= 10;
-    stepY = 0;
-}
-
-void turnRight()
-{
-    stepX += 10;
-    stepY = 0;
-}
-
-void handlePlane(SDL_Event& e, vector<Texture*>& amo, SDL_Renderer* renderer)
-{
-    if(e.type == SDL_MOUSEBUTTONDOWN)
-    {
-        if(e.button.button== SDL_BUTTON_LEFT)
-        {
-            Texture* a= new Texture();
-            a->loadFromFile("bullet.png", renderer);
-            a->x=ourPlane.x + 50;;
-            a->y=ourPlane.y+50;;
-            amo.push_back(a);
-        }
-    }
-    if( e.type == SDL_KEYDOWN && e.key.repeat == 0 )
-    {
-        switch( e.key.keysym.sym )
-        {
-        case SDLK_LEFT:
-            turnLeft();
-            break;
-        case SDLK_RIGHT:
-            turnRight();
-            break;
-        }
-    }
-    else if( e.type == SDL_KEYUP && e.key.repeat == 0 )
-    {
-        switch( e.key.keysym.sym )
-        {
-        case SDLK_LEFT:
-            turnRight();
-            break;
-        case SDLK_RIGHT:
-            turnLeft();
-            break;
-        }
-    }
-}
-
-void moveEnermy(Texture s[], const int& diem)
-{
-    ENERMY_SPEED = 7 + diem*1/100;
-    for(int i=0; i<4; i++)
-    {
-        if(s[i].y>SCREEN_HEIGHT)
-        {
-            s[i].x=rand()%(SCREEN_WIDTH-s[i].getWidth());
-            s[i].y=-100*i;
-        }
-        s[i].y += ENERMY_SPEED;
-    }
-}
-
-
-bool isGameOver(Texture s[])
+bool isGameOver(Texture enermy[], Texture enermyBullet[], Texture* ourPlane)
 {
     for(int i=0; i<4; i++)
     {
-        int enermyTop = s[i].y + ourPlane.getHeight() - 50;
-        int enermyLeft = s[i].x+s[i].getWidth();
-        int enermyRight = s[i].x-s[i].getWidth();
-        if(ourPlane.y <= enermyTop && enermyLeft > ourPlane.x && enermyRight < ourPlane.x)
+        int enermyTop = enermy[i].y + ourPlane->getHeight() - 50;
+        int enermyLeft = enermy[i].x+enermy[i].getWidth();
+        int enermyRight = enermy[i].x-enermy[i].getWidth();
+        if(ourPlane->y <= enermyTop && enermyLeft > ourPlane->x && enermyRight < ourPlane->x)
         {
-            ourPlane.x = -200;
+            ourPlane->x = -200;
+            return true;
+        }
+        int enermyBulletTop = enermyBullet[i].y + ourPlane->getHeight() - 50;
+        int enermyBulletLeft = enermyBullet[i].x+enermyBullet[i].getWidth();
+        int enermyBulletRight = enermyBullet[i].x-enermyBullet[i].getWidth();
+        if(ourPlane->y <= enermyBulletTop && enermyBulletLeft > ourPlane->x && enermyBulletRight < ourPlane->x)
+        {
+            ourPlane->x = -200;
             return true;
         }
     }
     return false;
 }
 
-bool banTrung(Texture s[], vector<Texture*> amo, int & checkEnermy, int & checkBullet)
+bool banTrung(Texture enermy[], vector<Texture*> bullet, int & checkEnermy, int & checkBullet)
 {
     for(int i=0; i<4; i++)
     {
-        int enermyTop = s[i].y + s[i].getHeight();
-        int enermyLeft = s[i].x - s[i].getWidth();
-        int enermyRight = s[i].x+s[i].getWidth();
-        for(int j=0; j<amo.size(); j++)
-            if(amo[j]->y <= enermyTop && enermyLeft <= amo[j]->x && enermyRight >= amo[j]->x)
+        int enermyTop = enermy[i].y + enermy[i].getHeight();
+        int enermyLeft = enermy[i].x - enermy[i].getWidth();
+        int enermyRight = enermy[i].x+enermy[i].getWidth();
+        for(unsigned int j=0; j<bullet.size(); j++)
+            if(bullet[j]->y <= enermyTop && enermyLeft <= bullet[j]->x && enermyRight >= bullet[j]->x)
             {
                 checkEnermy = i;
                 checkBullet = j;
@@ -234,21 +185,18 @@ bool banTrung(Texture s[], vector<Texture*> amo, int & checkEnermy, int & checkB
     return false;
 }
 
-void resetPos(Texture s[])
+void resetPos(Texture enermy[], Texture enermyBullet[])
 {
     for (int i=0; i<4; i++)
     {
-        s[i].x=-1000;
-        s[i].y=0;
+        enermy[i].x=-1000;
+        enermy[i].y=0;
+        enermyBullet[i].x=-1000;
+        enermyBullet[i].y=0;
     }
 }
 
-void moveAmo(Texture* p)
-{
-    p->y -= 20;
-}
-
-void drawBackground(SDL_Renderer* renderer)
+void drawBackground(SDL_Renderer* renderer, Texture* ourPlane)
 {
     scrollingOffset+=2;
     if( scrollingOffset > backgroundGame.getHeight() )
@@ -257,40 +205,59 @@ void drawBackground(SDL_Renderer* renderer)
     }
     backgroundGame.renderBackground( 0, scrollingOffset, renderer);
     backgroundGame.renderBackground( 0, scrollingOffset - backgroundGame.getHeight(), renderer);
-    ourPlane.render(renderer);
+    ourPlane->render(renderer);
 }
 
-void drawMenu(SDL_Renderer* renderer,const int& lanchoi, bool& startGame, SDL_Event& e, Texture s[]){
+void drawMenu(SDL_Renderer* renderer,const int& lanchoi, bool& startGame, SDL_Event& e, Texture enermy[], Texture enermyBullet[]){
     test.render(renderer);
+    huongDan.render(renderer);
+    title.render(renderer);
     if(lanchoi>1)
         gameOver.render(renderer);
     if (  e.type == SDL_KEYDOWN )
         if(e.key.keysym.sym == SDLK_SPACE)
         {
-            resetPos(s);
-            ourPlane.x = SCREEN_WIDTH/2-50;
-            startGame = false;
+            resetPos(enermy, enermyBullet);
+            startGame = true;
         }
 }
 
-void drawGamePlay(SDL_Renderer* renderer, Texture s[], vector<Texture*> & amo, const int& diem){
+void drawGamePlay(SDL_Renderer* renderer, Texture enermy[], vector<Texture*> & bullet, const int& diem, Texture enermyBullet[]){
     SDL_Color textColor = { 255, 255, 255 };
     score.loadFromRenderedText( to_string(diem), textColor, renderer );
     score.render(renderer);
-    for(int i=0; i<4; i++)
-        s[i].render(renderer);
-    for (int i=0; i<amo.size(); i++)
+    for(int i=0; i<4; i++){
+        enermy[i].render(renderer);
+        enermyBullet[i].render(renderer);
+    }
+    for (unsigned int i=0; i<bullet.size(); i++)
     {
-        Texture* p = amo.at(i);
+        Texture* p = bullet.at(i);
         if(p!=NULL)
         {
-            moveAmo(p);
+            moveBullet(p);
             p->render(renderer);
-            if(amo[i]->y<0)
+            if(bullet[i]->y<0)
             {
-                amo.erase(amo.begin()+i);
                 delete p;
+                bullet.erase(bullet.begin()+i);
             }
         }
             }
+}
+
+void close( Texture enermy[], Texture enermyBullet[], Texture* ourPlane){
+    for (int i=0; i<4; i++){
+        enermy[i].free();
+        enermyBullet[i].free();
+    }
+    huongDan.free();
+    title.free();
+    gameOver.free();
+    test.free();
+    score.free();
+    delete ourPlane;
+    ourPlane->free();
+    enermy1.free();
+    backgroundGame.free();
 }

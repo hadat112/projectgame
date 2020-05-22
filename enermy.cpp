@@ -11,7 +11,7 @@ void moveEnermy(Texture enermy[], const int& diem, const int& SCREEN_WIDTH, cons
         if(enermy[i].y>SCREEN_HEIGHT)
         {
             enermy[i].x=rand()%(SCREEN_WIDTH-enermy[i].getWidth());
-            enermy[i].y=-100*i;
+            enermy[i].y=-80*i;
         }
         enermy[i].y += ENERMY_SPEED;
     }
@@ -20,7 +20,7 @@ void moveEnermy(Texture enermy[], const int& diem, const int& SCREEN_WIDTH, cons
 void orbit(int& x, int& y, const int& diem, int& BULLET_SPEED){
     BULLET_SPEED = 10 + diem*1/500;
     if(diem>=100) y+=BULLET_SPEED;
-    if(diem>200) {
+    if(diem>250) {
         x=x+5*sin(float(y/100));
     }
 }

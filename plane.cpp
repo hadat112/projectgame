@@ -24,7 +24,7 @@ void turnRight()
     PLANE_SPEED += 10;
 }
 
-void handlePlane(SDL_Event& e, vector<Texture*>& amo, SDL_Renderer* renderer, Texture* ourPlane)
+void handlePlane(SDL_Event& e, vector<Texture*>& bullet, SDL_Renderer* renderer, Texture* ourPlane)
 {
     fire = Mix_LoadWAV("fire.wav");
     if(e.type == SDL_MOUSEBUTTONDOWN)
@@ -36,7 +36,7 @@ void handlePlane(SDL_Event& e, vector<Texture*>& amo, SDL_Renderer* renderer, Te
             a->loadFromFile("bullet.png", renderer);
             a->x=ourPlane->x + 50;;
             a->y=ourPlane->y+50;;
-            amo.push_back(a);
+            bullet.push_back(a);
         }
     }
     if( e.type == SDL_KEYDOWN && e.key.repeat == 0 )

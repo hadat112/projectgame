@@ -21,6 +21,7 @@ public:
     void free();
     void render(SDL_Renderer* renderer);
     void renderBackground(int a, int b, SDL_Renderer* renderer);
+    void renderClip(int a, int b, SDL_Rect* currentClip, SDL_Renderer* renderer);
     int getWidth();
     int getHeight();
     int x;

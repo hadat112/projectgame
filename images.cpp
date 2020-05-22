@@ -106,6 +106,11 @@ void Texture :: renderBackground(int a, int b, SDL_Renderer* renderer)
     SDL_Rect renderQuad = { a, b, width, height };
     SDL_RenderCopy( renderer, newTexture, NULL, &renderQuad );
 }
+void Texture :: renderClip(int a, int b, SDL_Rect* currentClip, SDL_Renderer* renderer)
+{
+    SDL_Rect renderQuad = { a, b, width, height };
+    SDL_RenderCopy( renderer, newTexture, currentClip, &renderQuad );
+}
 
 int Texture::getWidth()
 {

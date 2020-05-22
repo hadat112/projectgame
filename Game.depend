@@ -1,8 +1,9 @@
 # depslib dependency file v1.0
-1589565208 source:d:\project\game\game.cpp
+1590128272 source:d:\project\game\game.cpp
 	<iostream>
 	<SDL2/SDL.h>
 	<SDL2/SDl_image.h>
+	<SDL2/SDL_mixer.h>
 	<SDL2/SDL_ttf.h>
 	<string>
 	<vector>
@@ -19,14 +20,14 @@
 	<SDL2/SDL.h>
 	<SDL2/SDL_ttf.h>
 
-1588990931 d:\project\game\images.h
+1590077907 d:\project\game\images.h
 	<iostream>
 	<SDL2/SDL.h>
 	<SDL2/SDl_image.h>
 	<SDL2/SDL_ttf.h>
 	"SDL_Utils.h"
 
-1588991128 source:d:\project\game\images.cpp
+1590078147 source:d:\project\game\images.cpp
 	<iostream>
 	<SDL2/SDL.h>
 	<SDL2/SDl_image.h>
@@ -34,14 +35,14 @@
 	"SDL_Utils.h"
 	"images.h"
 
-1589733685 source:d:\project\game\sdl_utils.cpp
+1589735201 source:d:\project\game\sdl_utils.cpp
 	<iostream>
 	<SDL2/SDL.h>
 	<SDL2/SDl_image.h>
 	<SDL2/SDL_mixer.h>
 	<SDL2/SDL_ttf.h>
 
-1589734238 d:\project\game\plane.h
+1589735421 d:\project\game\plane.h
 	<iostream>
 	<SDL2/SDL.h>
 	<SDL2/SDl_image.h>
@@ -49,7 +50,7 @@
 	<vector>
 	"images.h"
 
-1589734238 source:d:\project\game\plane.cpp
+1590126667 source:d:\project\game\plane.cpp
 	"plane.h"
 
 1589564996 d:\project\game\enermy.h
@@ -60,6 +61,6 @@
 	<cmath>
 	"images.h"
 
-1589564996 source:d:\project\game\enermy.cpp
+1590126333 source:d:\project\game\enermy.cpp
 	"enermy.h"
 
